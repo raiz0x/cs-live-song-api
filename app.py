@@ -1,12 +1,12 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 import subprocess
 import os
 import hashlib
-import glob
 
 app = Flask(__name__)
 
-MUSIC_DIR = "/tmp/music"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MUSIC_DIR = os.path.join(BASE_DIR, "music")
 os.makedirs(MUSIC_DIR, exist_ok=True)
 
 @app.route("/play")
@@ -44,7 +44,8 @@ def play():
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)
     
-    os.remove(f"{temp}.wav")
+    if os.path.exists(f"{temp}.wav"):
+        os.remove(f"{temp}.wav")
     
     if result.returncode != 0 or not os.path.exists(wav_file):
         return jsonify({"error": "Conversion failed", "debug": result.stderr}), 500
@@ -59,7 +60,19 @@ def play():
 
 @app.route("/music/<path:filename>")
 def serve_music(filename):
+    filepath = os.path.join(MUSIC_DIR, filename)
+    if not os.path.exists(filepath):
+        return jsonify({"error": "File not found", "path": filepath}), 404
     return send_from_directory(MUSIC_DIR, filename)
+
+@app.route("/debug")
+def debug():
+    files = os.listdir(MUSIC_DIR) if os.path.exists(MUSIC_DIR) else []
+    return jsonify({
+        "music_dir": MUSIC_DIR,
+        "exists": os.path.exists(MUSIC_DIR),
+        "files": files
+    })
 
 def get_duration(filepath):
     cmd = ["ffprobe", "-v", "error", "-show_entries", "format=duration",

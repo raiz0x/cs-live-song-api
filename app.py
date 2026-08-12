@@ -17,7 +17,7 @@ def play():
 
     h = hashlib.md5(q.encode()).hexdigest()
     wav_file = os.path.join(MUSIC_DIR, f"{h}_8k.wav")
-    base_url = request.host_url.rstrip("/")
+    base_url = request.host_url.rstrip("/").replace("http://", "https://")
 
     if os.path.exists(wav_file):
         dur = get_duration(wav_file)

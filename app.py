@@ -6,7 +6,7 @@ import glob
 
 app = Flask(__name__)
 
-MUSIC_DIR = "/tmp/music"  # Pe Render, /tmp e writable
+MUSIC_DIR = "/tmp/music"
 os.makedirs(MUSIC_DIR, exist_ok=True)
 
 @app.route("/play")
@@ -19,7 +19,6 @@ def play():
     wav_file = os.path.join(MUSIC_DIR, f"{h}_8k.wav")
     base_url = request.host_url.rstrip("/")
 
-    # Cache
     if os.path.exists(wav_file):
         dur = get_duration(wav_file)
         return jsonify({
@@ -28,7 +27,6 @@ def play():
             "duration": dur
         })
 
-    # 1. Search & download with yt-dlp
     temp = os.path.join(MUSIC_DIR, h)
     cmd = [
         "yt-dlp", "-x", "--audio-format", "wav", "--audio-quality", "0",
@@ -39,7 +37,6 @@ def play():
     if result.returncode != 0 or not os.path.exists(f"{temp}.wav"):
         return jsonify({"error": "Download failed", "debug": result.stderr}), 500
 
-    # 2. Convert to 8kHz mono PCM
     cmd = [
         "ffmpeg", "-y", "-i", f"{temp}.wav",
         "-ar", "8000", "-ac", "1", "-acodec", "pcm_s16le",

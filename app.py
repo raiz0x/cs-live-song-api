@@ -30,10 +30,7 @@ def play():
     temp = os.path.join(MUSIC_DIR, h)
     cmd = [
         "yt-dlp",
-        "--extractor-args", "youtube:player_client=web",
-        "--no-check-certificate",
-        "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.0",
-        "--referer", "https://www.youtube.com/",
+        "--cookies", "youtube_cookies.txt",
         "-x", "--audio-format", "wav", "--audio-quality", "0",
         "-o", f"{temp}.%(ext)s", f"ytsearch1:{q}"
     ]

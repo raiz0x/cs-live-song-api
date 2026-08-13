@@ -85,6 +85,7 @@ def play():
             all_errors.append(f"{source_name}: {err_snippet}")
 
     if not source_used:
+        #print(f"DEBUG: all_errors = {all_errors}")
         for f in glob.glob(f"{temp_base}*"):
             if os.path.exists(f):
                 os.remove(f)

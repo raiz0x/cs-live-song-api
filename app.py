@@ -17,8 +17,6 @@ os.makedirs(MUSIC_DIR, exist_ok=True)
 
 SOURCES = [
     ("scsearch1", "SoundCloud"),
-    ("bcsearch1", "Bandcamp"),
-    ("dzsearch1", "Deezer"),
     ("ytsearch1", "YouTube"),
 ]
 

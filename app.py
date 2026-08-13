@@ -10,6 +10,7 @@ subprocess.run([sys.executable, "-m", "pip", "install", "-U", "yt-dlp"], capture
 
 app = Flask(__name__)
 
+COOKIES_FILE = os.path.join(BASE_DIR, "youtube_cookies.txt")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MUSIC_DIR = os.path.join(BASE_DIR, "music")
 os.makedirs(MUSIC_DIR, exist_ok=True)
@@ -49,6 +50,7 @@ def play():
             "yt-dlp",
             "--no-check-certificate",
             "--user-agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+            "--cookies", COOKIES_FILE,
             "--no-playlist",
             "--max-downloads", "1",
             "-x", "--audio-format", "wav", "--audio-quality", "0",

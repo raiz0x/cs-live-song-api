@@ -4,6 +4,9 @@ import subprocess
 import sys
 #import tempfile
 import glob
+'''import shutil
+yt_dlp_path = shutil.which("yt-dlp")
+cmd = [yt_dlp_path, ...]'''
 
 from flask import Flask, request, jsonify, send_from_directory
 
@@ -52,7 +55,7 @@ def play():
 
     for source_prefix, source_name in SOURCES:
         cmd = [
-            "yt-dlp",
+            "yt-dlp", #"/usr/local/bin/yt-dlp"
             "--no-check-certificate",
             "--user-agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
             "--no-playlist",
@@ -73,7 +76,7 @@ def play():
 
         #if result.returncode == 0 and os.path.exists(f"{temp_base}.wav"):
         wav_files = glob.glob(f"{temp_base}*.wav")
-        if result.returncode == 0 and wav_files:
+        if wav_files: #result.returncode == 0 and wav_files SAU if result.returncode in (0, 101) and wav_files
             source_used = source_name
             temp_wav = wav_files[0]
             break

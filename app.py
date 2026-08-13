@@ -2,7 +2,7 @@ import os
 import hashlib
 import subprocess
 import sys
-import tempfile
+#import tempfile
 import glob
 
 from flask import Flask, request, jsonify, send_from_directory
@@ -48,6 +48,7 @@ def play():
 
     all_errors = []
     source_used = None
+    temp_wav = None
 
     for source_prefix, source_name in SOURCES:
         cmd = [
@@ -73,7 +74,7 @@ def play():
         #if result.returncode == 0 and os.path.exists(f"{temp_base}.wav"):
         wav_files = glob.glob(f"{temp_base}*.wav")
         if result.returncode == 0 and wav_files:
-            source_used = source_name #def on
+            source_used = source_name
             temp_wav = wav_files[0]
             break
         else:
@@ -81,8 +82,7 @@ def play():
             all_errors.append(f"{source_name}: {err_snippet}")
 
     if not source_used:
-        for ext in [".wav", ".webm", ".m4a", ".mp3", ".part", ".opus", ".ogg"]:
-            f = temp_base + ext
+        for f in glob.glob(f"{temp_base}*"):
             if os.path.exists(f):
                 os.remove(f)
         return jsonify({

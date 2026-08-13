@@ -111,7 +111,7 @@ def play():
     cmd = [
         "ffmpeg", "-y", "-i", temp_wav,
         "-ar", "8000", "-ac", "1", "-acodec", "pcm_s16le",
-        "-af", "volume=0.8", #nou
+        "-af", "volume=0.5", #nou SAU loudnorm=I=-20:TP=-2:LRA=11
         wav_file
     ]
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)

@@ -38,16 +38,28 @@ def play():
         os.remove(wav_file)
         '''dur = get_duration(wav_file)
         return jsonify({
-            "url": f"{base_url}/music/{h}_8k.wav",
+            "url": f"{base_url}/music/{h}_8k.wav", #stream_temp.wav
             "title": q,
             "duration": dur,
-            "source": "cache"
+            "source": "cache",
+            "ready": True
         })'''
 
     #temp_fd, temp_base = tempfile.mkstemp(dir=MUSIC_DIR, prefix=f"{h}_")
     #os.close(temp_fd)
     #os.remove(temp_base)
 
+    '''thread = threading.Thread(target=process_song, args=(q,))
+    thread.start()
+
+    return jsonify({
+        "url": f"{base_url}/music/stream_temp.wav",
+        "title": q,
+        "duration": 180,
+        "source": "processing",
+        "ready": False
+    })
+    #SI OFF ASTEA DE JOS'''
     temp_base = os.path.join(MUSIC_DIR, "temp_download") #temp_base = os.path.join(MUSIC_DIR, f"{h}_temp")
 
     all_errors = []
@@ -117,19 +129,32 @@ def play():
         "url": f"{base_url}/music/stream_temp.wav", #{base_url}/music/{h}_8k.wav
         "title": q,
         "duration": dur,
-        "source": source_used
+        "source": source_used,
+        "size_mb": round(os.path.getsize(wav_file) / 1024 / 1024, 2),
+        "created": os.path.getctime(wav_file),
+        "modified": os.path.getmtime(wav_file)
     })
 
 @app.route("/music/<path:filename>")
 def serve_music(filename):
     filepath = os.path.join(MUSIC_DIR, filename)
     if not os.path.exists(filepath):
-        return jsonify({"error": "File not found", "path": filepath}), 404
+        return jsonify({"error": "File not found", "path": filepath, "ready": False}), 404
     return send_from_directory(MUSIC_DIR, filename)
 
 @app.route("/debug")
 def debug():
-    files = os.listdir(MUSIC_DIR) if os.path.exists(MUSIC_DIR) else []
+    files = []
+    if os.path.exists(MUSIC_DIR):
+        for f in os.listdir(MUSIC_DIR):
+            path = os.path.join(MUSIC_DIR, f)
+            if os.path.isfile(path):
+                files.append({
+                    "name": f,
+                    "size_mb": round(os.path.getsize(path) / 1024 / 1024, 2),
+                    "created": os.path.getctime(path),
+                    "modified": os.path.getmtime(path)
+                })
     return jsonify({
         "music_dir": MUSIC_DIR,
         "exists": os.path.exists(MUSIC_DIR),

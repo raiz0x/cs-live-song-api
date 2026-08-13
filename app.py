@@ -31,6 +31,7 @@ def play():
     cmd = [
         "yt-dlp",
         "--cookies", "youtube_cookies.txt",
+        "--js-runtimes", "nodejs",
         "-x", "--audio-format", "wav", "--audio-quality", "0",
         "-o", f"{temp}.%(ext)s", f"ytsearch1:{q}"
     ]

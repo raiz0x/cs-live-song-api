@@ -1,7 +1,12 @@
-from flask import Flask, request, jsonify, send_from_directory
 import subprocess
+import sys
 import os
 import hashlib
+
+from flask import Flask, request, jsonify, send_from_directory
+
+subprocess.run([sys.executable, "-m", "pip", "install", "-U", "yt-dlp"], 
+               capture_output=True)
 
 app = Flask(__name__)
 
@@ -29,8 +34,12 @@ def play():
 
     temp = os.path.join(MUSIC_DIR, h)
     cmd = [
-        "yt-dlp", "-x", "--audio-format", "wav", "--audio-quality", "0",
-        "-o", f"{temp}.%(ext)s", f"ytsearch1:{q}"
+        "yt-dlp",
+        "--no-check-certificate",
+        "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.0",
+        "-x", "--audio-format", "wav", "--audio-quality", "0",
+        "-o", f"{temp}.%(ext)s",
+        f"ytsearch1:{q}"
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)
 

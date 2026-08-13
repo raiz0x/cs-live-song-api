@@ -32,7 +32,7 @@ def play():
 
     #h = hashlib.md5(q.lower().encode()).hexdigest()
     wav_file = os.path.join(MUSIC_DIR, "stream_temp.wav") #wav_file = os.path.join(MUSIC_DIR, f"{h}_8k.wav")
-    base_url = request.host_url.rstrip("/").replace("http://", "https://")
+    base_url = "http://5.188.183.163:8080" #base_url = request.host_url.rstrip("/").replace("http://", "https://") SAU fara .replace
 
     if os.path.exists(wav_file):
         os.remove(wav_file)
@@ -111,6 +111,7 @@ def play():
     cmd = [
         "ffmpeg", "-y", "-i", temp_wav,
         "-ar", "8000", "-ac", "1", "-acodec", "pcm_s16le",
+        "-af", "volume=0.8", #nou
         wav_file
     ]
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
@@ -176,4 +177,4 @@ def get_duration(filepath):
         return 180
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    app.run(host="0.0.0.0", port=8080)

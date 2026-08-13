@@ -55,7 +55,7 @@ def play():
 
     for source_prefix, source_name in SOURCES:
         cmd = [
-            "yt-dlp", #"/usr/local/bin/yt-dlp"
+            "yt-dlp", # SAU /usr/local/bin/yt-dlp
             "--no-check-certificate",
             "--user-agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
             "--no-playlist",
@@ -66,7 +66,7 @@ def play():
         ]
 
         if source_name == "YouTube" and os.path.exists(COOKIES_FILE):
-            cmd.extend(["--cookies", COOKIES_FILE])
+            cmd.extend(["--cookies", COOKIES_FILE]) #creca trba si pt file?
 
         try:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=180)

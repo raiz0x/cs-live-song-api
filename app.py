@@ -73,6 +73,11 @@ def debug():
         "exists": os.path.exists(MUSIC_DIR),
         "files": files
     })
+    
+@app.route("/test")
+def test():
+    result = subprocess.run(["yt-dlp", "--version"], capture_output=True, text=True)
+    return jsonify({"version": result.stdout, "error": result.stderr})
 
 def get_duration(filepath):
     cmd = ["ffprobe", "-v", "error", "-show_entries", "format=duration",

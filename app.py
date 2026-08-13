@@ -3,6 +3,7 @@ import hashlib
 import subprocess
 import sys
 import tempfile
+import glob
 
 from flask import Flask, request, jsonify, send_from_directory
 
@@ -69,8 +70,11 @@ def play():
             all_errors.append(f"{source_name}: timeout")
             continue
 
-        if result.returncode == 0 and os.path.exists(f"{temp_base}.wav"):
-            source_used = source_name
+        #if result.returncode == 0 and os.path.exists(f"{temp_base}.wav"):
+        wav_files = glob.glob(f"{temp_base}*.wav")
+        if result.returncode == 0 and wav_files:
+            source_used = source_name #def on
+            temp_wav = wav_files[0]
             break
         else:
             err_snippet = result.stderr[:200] if result.stderr else "unknown error"
@@ -88,14 +92,14 @@ def play():
         }), 500
 
     cmd = [
-        "ffmpeg", "-y", "-i", f"{temp_base}.wav",
+        "ffmpeg", "-y", "-i", temp_wav,
         "-ar", "8000", "-ac", "1", "-acodec", "pcm_s16le",
         wav_file
     ]
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
 
-    if os.path.exists(f"{temp_base}.wav"):
-        os.remove(f"{temp_base}.wav")
+    if os.path.exists(temp_wav):
+        os.remove(temp_wav)
 
     if result.returncode != 0 or not os.path.exists(wav_file):
         if os.path.exists(wav_file):

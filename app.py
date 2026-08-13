@@ -29,7 +29,10 @@ def play():
 
     temp = os.path.join(MUSIC_DIR, h)
     cmd = [
-        "yt-dlp", "-x", "--audio-format", "wav", "--audio-quality", "0",
+        "yt-dlp",
+        "--extractor-args", "youtube:player_client=android",
+        "--no-check-certificate",
+        "-x", "--audio-format", "wav", "--audio-quality", "0",
         "-o", f"{temp}.%(ext)s", f"ytsearch1:{q}"
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)

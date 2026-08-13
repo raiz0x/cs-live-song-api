@@ -30,24 +30,25 @@ def play():
     if not q:
         return jsonify({"error": "Missing query"}), 400
 
-    h = hashlib.md5(q.lower().encode()).hexdigest()
-    wav_file = os.path.join(MUSIC_DIR, f"{h}_8k.wav")
+    #h = hashlib.md5(q.lower().encode()).hexdigest()
+    wav_file = os.path.join(MUSIC_DIR, "stream_temp.wav") #wav_file = os.path.join(MUSIC_DIR, f"{h}_8k.wav")
     base_url = request.host_url.rstrip("/").replace("http://", "https://")
 
     if os.path.exists(wav_file):
-        dur = get_duration(wav_file)
+        os.remove(wav_file)
+        '''dur = get_duration(wav_file)
         return jsonify({
             "url": f"{base_url}/music/{h}_8k.wav",
             "title": q,
             "duration": dur,
             "source": "cache"
-        })
+        })'''
 
     #temp_fd, temp_base = tempfile.mkstemp(dir=MUSIC_DIR, prefix=f"{h}_")
     #os.close(temp_fd)
     #os.remove(temp_base)
 
-    temp_base = os.path.join(MUSIC_DIR, f"{h}_temp")
+    temp_base = os.path.join(MUSIC_DIR, "temp_download") #temp_base = os.path.join(MUSIC_DIR, f"{h}_temp")
 
     all_errors = []
     source_used = None
@@ -113,7 +114,7 @@ def play():
     dur = get_duration(wav_file)
 
     return jsonify({
-        "url": f"{base_url}/music/{h}_8k.wav",
+        "url": f"{base_url}/music/stream_temp.wav", #{base_url}/music/{h}_8k.wav
         "title": q,
         "duration": dur,
         "source": source_used

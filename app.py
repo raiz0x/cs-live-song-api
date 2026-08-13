@@ -29,14 +29,11 @@ def play():
 
     temp = os.path.join(MUSIC_DIR, h)
     cmd = [
-        "yt-dlp",
-        "--cookies", "youtube_cookies.txt",
-        "--js-runtimes", "deno",
-        "-x", "--audio-format", "wav", "--audio-quality", "0",
+        "yt-dlp", "-x", "--audio-format", "wav", "--audio-quality", "0",
         "-o", f"{temp}.%(ext)s", f"ytsearch1:{q}"
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)
-    
+
     if result.returncode != 0 or not os.path.exists(f"{temp}.wav"):
         return jsonify({"error": "Download failed", "debug": result.stderr}), 500
 
@@ -46,15 +43,15 @@ def play():
         wav_file
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)
-    
+
     if os.path.exists(f"{temp}.wav"):
         os.remove(f"{temp}.wav")
-    
+
     if result.returncode != 0 or not os.path.exists(wav_file):
         return jsonify({"error": "Conversion failed", "debug": result.stderr}), 500
 
     dur = get_duration(wav_file)
-    
+
     return jsonify({
         "url": f"{base_url}/music/{h}_8k.wav",
         "title": q,

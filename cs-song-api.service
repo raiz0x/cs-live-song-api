@@ -1,0 +1,15 @@
+[Unit]
+Description=CS Song API
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/usr/games/cs/api/live-song
+Environment="PATH=/usr/games/cs/api/live-song/venv/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/usr/games/cs/api/live-song/venv/bin/gunicorn -b 0.0.0.0:8080 --timeout 300 --workers 1 --worker-class gthread --threads 2 app:app
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

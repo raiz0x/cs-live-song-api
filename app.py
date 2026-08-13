@@ -39,9 +39,11 @@ def play():
             "source": "cache"
         })
 
-    temp_fd, temp_base = tempfile.mkstemp(dir=MUSIC_DIR, prefix=f"{h}_")
-    os.close(temp_fd)
-    os.remove(temp_base)
+    #temp_fd, temp_base = tempfile.mkstemp(dir=MUSIC_DIR, prefix=f"{h}_")
+    #os.close(temp_fd)
+    #os.remove(temp_base)
+
+    temp_base = os.path.join(MUSIC_DIR, f"{h}_temp")
 
     all_errors = []
     source_used = None

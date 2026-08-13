@@ -10,9 +10,9 @@ subprocess.run([sys.executable, "-m", "pip", "install", "-U", "yt-dlp"], capture
 
 app = Flask(__name__)
 
-COOKIES_FILE = os.path.join(BASE_DIR, "youtube_cookies.txt")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MUSIC_DIR = os.path.join(BASE_DIR, "music")
+COOKIES_FILE = os.path.join(BASE_DIR, "youtube_cookies.txt")
 os.makedirs(MUSIC_DIR, exist_ok=True)
 
 SOURCES = [
@@ -37,37 +37,55 @@ def play():
         return jsonify({
             "url": f"{base_url}/music/{h}_8k.wav",
             "title": q,
-            "duration": dur
+            "duration": dur,
+            "source": "cache"
         })
 
     temp_fd, temp_base = tempfile.mkstemp(dir=MUSIC_DIR, prefix=f"{h}_")
     os.close(temp_fd)
     os.remove(temp_base)
 
+    all_errors = []
     source_used = None
+
     for source_prefix, source_name in SOURCES:
         cmd = [
             "yt-dlp",
             "--no-check-certificate",
             "--user-agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
-            "--cookies", COOKIES_FILE,
             "--no-playlist",
             "--max-downloads", "1",
             "-x", "--audio-format", "wav", "--audio-quality", "0",
             "-o", f"{temp_base}.%(ext)s",
             f"{source_prefix}:{q}"
         ]
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+
+        if source_name == "YouTube" and os.path.exists(COOKIES_FILE):
+            cmd.extend(["--cookies", COOKIES_FILE])
+
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+        except subprocess.TimeoutExpired:
+            all_errors.append(f"{source_name}: timeout")
+            continue
+
         if result.returncode == 0 and os.path.exists(f"{temp_base}.wav"):
             source_used = source_name
             break
+        else:
+            err_snippet = result.stderr[:200] if result.stderr else "unknown error"
+            all_errors.append(f"{source_name}: {err_snippet}")
 
     if not source_used:
         for ext in [".wav", ".webm", ".m4a", ".mp3", ".part", ".opus", ".ogg"]:
             f = temp_base + ext
             if os.path.exists(f):
                 os.remove(f)
-        return jsonify({"error": "Download failed", "debug": result.stderr}), 500
+        return jsonify({
+            "error": "Download failed",
+            "sources_tried": [s[1] for s in SOURCES],
+            "debug": " | ".join(all_errors)
+        }), 500
 
     cmd = [
         "ffmpeg", "-y", "-i", f"{temp_base}.wav",
@@ -89,7 +107,8 @@ def play():
     return jsonify({
         "url": f"{base_url}/music/{h}_8k.wav",
         "title": q,
-        "duration": dur
+        "duration": dur,
+        "source": source_used
     })
 
 @app.route("/music/<path:filename>")

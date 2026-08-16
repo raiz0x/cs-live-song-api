@@ -17,4 +17,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app.py .
 
 EXPOSE 10000
-CMD ["gunicorn", "-b", "0.0.0.0:8080", "--timeout", "300", "--workers", "1", "--worker-class", "gthread", "--threads", "4", "app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "--reload", "--timeout", "300", "--workers", "1", "--worker-class", "gthread", "--threads", "4", "app:app"]

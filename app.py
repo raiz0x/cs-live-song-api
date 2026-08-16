@@ -24,6 +24,15 @@ SOURCES = [
     ("ytsearch1", "YouTube"),
 ]
 
+def get_duration(filepath):
+    cmd = ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+           "-of", "default=noprint_wrappers=1:nokey=1", filepath]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    try:
+        return round(float(result.stdout.strip()))
+    except:
+        return 180
+
 @app.route("/play")
 def play():
     q = request.args.get("q", "").strip()
@@ -110,8 +119,8 @@ def play():
 
     cmd = [
         "ffmpeg", "-y", "-i", temp_wav,
-        "-ar", "8000", "-ac", "1", "-acodec", "pcm_s16le",
-        "-af", "volume=0.5", #nou SAU loudnorm=I=-20:TP=-2:LRA=11
+        "-ar", "8000", "-ac", "1", "-acodec", "pcm_s16le", #48000
+        "-af", "volume=0.5", #nou | loudnorm=I=-20:TP=-2:LRA=11 + ,volume ?
         wav_file
     ]
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
@@ -167,14 +176,5 @@ def test():
     result = subprocess.run(["yt-dlp", "--version"], capture_output=True, text=True)
     return jsonify({"version": result.stdout, "error": result.stderr})
 
-def get_duration(filepath):
-    cmd = ["ffprobe", "-v", "error", "-show_entries", "format=duration",
-           "-of", "default=noprint_wrappers=1:nokey=1", filepath]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    try:
-        return round(float(result.stdout.strip()))
-    except:
-        return 180
-
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    app.run(host="0.0.0.0", port=8080, debug=True)

@@ -174,7 +174,7 @@ def debug():
 @app.route("/test")
 def test():
     result = subprocess.run(["yt-dlp", "--version"], capture_output=True, text=True)
-    return jsonify({"version": result.stdout, "error": result.stderr})
+    return jsonify({"version": result.stdout.strip(), "error": result.stderr})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)

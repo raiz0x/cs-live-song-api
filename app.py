@@ -100,6 +100,7 @@ def play():
             "--no-playlist",
             "--max-downloads", "1",
             "--print", "webpage_url",
+            "--no-simulate",
             "-x", "--audio-format", "wav", "--audio-quality", "0",
             "-o", f"{temp_base}.%(ext)s",
             target_input

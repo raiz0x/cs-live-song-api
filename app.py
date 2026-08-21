@@ -33,6 +33,10 @@ def get_duration(filepath):
     except:
         return 180
 
+def is_url(query):
+    q = query.lower()
+    return q.startswith(("http://", "https://", "www.")) or "youtube.com/" in q or "youtu.be/" in q or "soundcloud.com/" in q
+
 @app.route("/play")
 def play():
     q = request.args.get("q", "").strip()
@@ -74,17 +78,31 @@ def play():
     all_errors = []
     source_used = None
     temp_wav = None
+    source_url = None
 
     for source_prefix, source_name in SOURCES:
+        if is_url(q):
+            clean_url = q if q.startswith(("http://", "https://")) else f"https://{q}"
+            
+            if "soundcloud.com" in clean_url.lower() and source_name != "SoundCloud":
+                continue
+            if ("youtube.com" in clean_url.lower() or "youtu.be" in clean_url.lower()) and source_name != "YouTube":
+                continue
+            
+            target_input = clean_url
+        else:
+            target_input = f"{source_prefix}:{q}"
+        
         cmd = [
             "yt-dlp", # SAU /usr/local/bin/yt-dlp
             "--no-check-certificate",
             "--user-agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
             "--no-playlist",
             "--max-downloads", "1",
+            "--print", "webpage_url",
             "-x", "--audio-format", "wav", "--audio-quality", "0",
             "-o", f"{temp_base}.%(ext)s",
-            f"{source_prefix}:{q}"
+            target_input
         ]
 
         if source_name == "YouTube" and os.path.exists(COOKIES_FILE):
@@ -101,6 +119,8 @@ def play():
         if wav_files: #result.returncode == 0 and wav_files SAU if result.returncode in (0, 101) and wav_files
             source_used = source_name
             temp_wav = wav_files[0]
+            if result.stdout:
+                source_url = result.stdout.strip().splitlines()[0]
             break
         else:
             err_snippet = result.stderr[:200] if result.stderr else "unknown error"
@@ -140,6 +160,7 @@ def play():
         "title": q,
         "duration": dur,
         "source": source_used,
+        "source_url": source_url,
         "size_mb": round(os.path.getsize(wav_file) / 1024 / 1024, 2),
         "created": os.path.getctime(wav_file),
         "modified": os.path.getmtime(wav_file)
